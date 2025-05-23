@@ -1,4 +1,4 @@
-module terx
+module github.com/teadove/terx
 
 go 1.24.0
 

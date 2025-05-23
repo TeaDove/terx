@@ -2,7 +2,7 @@ GO ?= GO111MODULE=on CGO_ENABLED=0 go
 VERSION ?= $(shell cat VERSION)
 
 tag:
-	git tag utils/$(VERSION)
+	git tag $(VERSION)
 	git push origin --tags
 
 test:
