@@ -3,6 +3,7 @@ package terx
 import (
 	"context"
 	"fmt"
+	"github.com/teadove/teasutils/utils/logger_utils"
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -22,16 +23,17 @@ type Handler struct {
 	Processor ProcessorFunc
 }
 
-func (r *Terx) PollerRun(ctx context.Context) {
+func (r *Terx) PollerRun() {
+	ctx := logger_utils.NewLvlLoggedCtx(r.LogLevel)
+
 	u := tgbotapi.NewUpdate(0)
 	// TODO move to settings
 	u.Timeout = 10
 	updates := r.Bot.GetUpdatesChan(u)
-
 	zerolog.Ctx(ctx).
 		Info().
-		Interface("handlers", len(r.Handlers)).
-		Msg("bot.polling.started")
+		Str("bot", r.Bot.Self.UserName).
+		Msg("bot.poller.started")
 
 	var wg sync.WaitGroup
 
@@ -39,27 +41,27 @@ func (r *Terx) PollerRun(ctx context.Context) {
 		wg.Add(1)
 		// TODO реализовать разные методы параллелизмма
 
-		go r.processUpdate(ctx, &wg, &update)
+		go r.processUpdate(&wg, &update)
 	}
 
 	wg.Wait()
 }
 
-func (r *Terx) processUpdate(ctx context.Context, wg *sync.WaitGroup, update *tgbotapi.Update) {
+func (r *Terx) processUpdate(wg *sync.WaitGroup, update *tgbotapi.Update) {
 	defer func() {
 		err := must_utils.AnyToErr(recover())
 		if err == nil {
 			return
 		}
 
-		zerolog.Ctx(ctx).
+		zerolog.Ctx(logger_utils.NewLoggedCtx()).
 			Error().
 			Stack().Err(err).
 			Interface("update", update).
 			Msg("panic.in.process.update")
 	}()
 
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(logger_utils.NewLvlLoggedCtx(r.LogLevel))
 	defer cancel()
 	defer wg.Done()
 
@@ -84,10 +86,6 @@ func (r *Terx) processUpdate(ctx context.Context, wg *sync.WaitGroup, update *tg
 			r.handleError(c, err, handler)
 			continue
 		}
-
-		c.Log().Debug().
-			Str("processor", reflect_utils.GetFunctionName(handler.Processor)).
-			Msg("handler.processed")
 	}
 
 	c.Log().Debug().

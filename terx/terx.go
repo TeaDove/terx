@@ -27,7 +27,7 @@ type Config struct {
 	OwnerUserID    int64
 }
 
-func New(config *Config) (*Terx, error) {
+func New(config Config) (*Terx, error) {
 	bot, err := tgbotapi.NewBotAPI(config.Token)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create bot client")
