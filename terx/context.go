@@ -14,9 +14,15 @@ type Ctx struct {
 	Context context.Context
 	Terx    *Terx
 
-	Text     string
+	// Text
+	// Update's text without Command
+	Text string
+
+	// FullText
+	// Update.Message.Text
 	FullText string
-	Command  string
+
+	Command string
 
 	Update tgbotapi.Update
 

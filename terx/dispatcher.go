@@ -3,8 +3,9 @@ package terx
 import (
 	"context"
 	"fmt"
-	"github.com/teadove/teasutils/utils/logger_utils"
 	"sync"
+
+	"github.com/teadove/teasutils/utils/logger_utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pkg/errors"
